@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "include/utils.h"
 
@@ -27,4 +28,14 @@ void init(float **points, float **clusters, int NP, int NC) {
         clusters[i][0] = points[i][0]
         clusters[i][1] = points[i][1]
     }
+}
+
+float min(float a, float b) {
+	if (a<b) return a;
+    else return b;
+}
+
+// euclidean distance between two points
+float euclideanDistance(float x1, float x2, float y1, float y2){
+    return (float) (sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)));
 }
