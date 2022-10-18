@@ -91,11 +91,15 @@ void free_points(int N, float** points){
     free(points);
 }
 
-void free_structs(int N, int K, float** points, struct cluster** clusters){
-    free_points(N, points);
+void free_clusters(int K, struct cluster** clusters){
     for(int i = 0; i < K; i++){
-        free_points(clusters[i]->max_points, clusters[i]->points);
-        free(clusters[i]);
+        free(clusters[i]->centroid);
+        free_points(clusters[i]->max_points,clusters[i]->points);
     }
     free(clusters);
+}
+
+void free_structs(int N, int K, float** points, struct cluster** clusters){
+    free_points(N, points);
+    free_clusters(K, clusters);
 }

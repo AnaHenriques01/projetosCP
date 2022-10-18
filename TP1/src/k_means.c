@@ -11,14 +11,16 @@
 #define FALSE 0
 
 int main(){
-    // printf("hello");
+
     int notOver = TRUE;
     int count = 0;
 
     float** points = initPoints(N);
     struct cluster** clusters = initClusters(N,K);
     init(N,K,points,clusters);
+    printf("hiiiiiii");
 
+    /*
     while(notOver){
         if(count == 0){
             // Se for a primeira iteração, não é preciso calcular o centróide.
@@ -46,14 +48,12 @@ int main(){
         count++;
     }
 
-    /*
     for(int i = 0; i < K; i++){
         printf("Cluster --> %d: \n",i);
         printf("Coordinate X: %f\n",clusters[i]->x);
         printf("Coordinate Y: %f\n\n",clusters[i]->y);
     }
-    */
-    /* ----------------------------------------- OUTPUT DO PROGRAMA:
+    ----------------------------------------- OUTPUT DO PROGRAMA:
     printf("N = %d, K = %d\n",N,K);
     for(int i = 0; i < K; i++){
         printf("Center: (%f, %f) : Size: %d\n",clusters[i]->centroid[0], clusters[i]->centroid[1], clusters[i]->number_points);
