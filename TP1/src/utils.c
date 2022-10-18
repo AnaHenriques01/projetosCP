@@ -5,9 +5,9 @@
 
 #include "../include/utils.h"
 
-float** initPoints(int NP){
-    float **points = (float**)malloc(NP*sizeof(float*));
-    for(int i = 0; i < NP; i++){
+float** initPoints(int N){
+    float **points = (float**)malloc(N*sizeof(float*));
+    for(int i = 0; i < N; i++){
         points[i] = (float*)malloc(2*sizeof(float));
         points[i][0] = 0.0;    // coordinate X
         points[i][1] = 0.0;    // coordinate Y
@@ -15,10 +15,10 @@ float** initPoints(int NP){
     return points;
 }
 
-struct cluster** initClusters(int NP, int NC){
-    int size = (int)(NP/pow(NC,2));
-    struct cluster** clusters = (struct cluster**)malloc(NC*sizeof(struct cluster*));
-    for(int i = 0; i < NC; i++){
+struct cluster** initClusters(int N, int K){
+    int size = (int)(N/K);
+    struct cluster** clusters = (struct cluster**)malloc(K*sizeof(struct cluster*));
+    for(int i = 0; i < K; i++){
         clusters[i] = (struct cluster*)malloc(sizeof(struct cluster));
         clusters[i]->centroid = (float*)malloc(2*sizeof(float));
         clusters[i]->centroid[0] = 0.0;
@@ -30,18 +30,18 @@ struct cluster** initClusters(int NP, int NC){
     return clusters;
 }
 
-void init(int NP, int NC, float** points, struct cluster** clusters) {
+void init(int N, int K, float** points, struct cluster** clusters) {
 
     srand(10);
-    for(int p = 0; p < NP; p++) {
+    for(int p = 0; p < N; p++) {
         points[p][0] = (float) rand() / RAND_MAX;       // coordinate X
         points[p][1] = (float) rand() / RAND_MAX;       // coordinate Y
     }
-    for(int i = 0; i < NC; i++) {
+    for(int i = 0; i < K; i++) {
         clusters[i]->centroid[0] = points[i][0];
         clusters[i]->centroid[1] = points[i][1];
         addToPoints(clusters[i], clusters[i]->centroid);
-    }
+    } 
 }
 
 float euclideanDistance(float x1, float y1, float x2, float y2){
@@ -61,10 +61,10 @@ void addToPoints(struct cluster* cluster, float* point) {
     cluster->number_points++;
 }
 
-void addToClosestCluster(float* p, struct cluster** clusters, int NC){
+void addToClosestCluster(float* p, struct cluster** clusters, int K){
     float minDistance = euclideanDistance(p[0],p[1], clusters[0]->centroid[0],clusters[0]->centroid[1]);
     int minCluster = 0;
-    for(int i = 1; i < NC; i++){
+    for(int i = 1; i < K; i++){
         float newDistance = euclideanDistance(p[0],p[1], clusters[i]->centroid[0],clusters[i]->centroid[1]);
         if (newDistance < minDistance){
             minDistance = newDistance;
@@ -84,16 +84,16 @@ void findCentroid(struct cluster* cluster){
     cluster->centroid[1] = (float)(y_sum/cluster->number_points);
 }
 
-void free_points(int NP, float** points){
-    for(int i = 0; i < NP; i++){
+void free_points(int N, float** points){
+    for(int i = 0; i < N; i++){
         free(points[i]);
     }
     free(points);
 }
 
-void free_structs(int NP, int NC, float** points, struct cluster** clusters){
-    free_points(NP, points);
-    for(int i = 0; i < NC; i++){
+void free_structs(int N, int K, float** points, struct cluster** clusters){
+    free_points(N, points);
+    for(int i = 0; i < K; i++){
         free_points(clusters[i]->max_points, clusters[i]->points);
         free(clusters[i]);
     }

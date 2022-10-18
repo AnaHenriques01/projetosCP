@@ -8,18 +8,18 @@ struct cluster{
     int max_points;     // 30
 };
 
-float** initPoints(int NP);
+float** initPoints(int N);
 
-struct cluster** initClusters(int NP, int NC);
+struct cluster** initClusters(int N, int K);
 
-void init(int NP, int NC, float** points, struct cluster** clusters);
+void init(int N, int K, float** points, struct cluster** clusters);
 
 void addToPoints(struct cluster* cluster, float* point);
 
-void addToClosestCluster(float* p, struct cluster** clusters, int NC);
+void addToClosestCluster(float* p, struct cluster** clusters, int K);
 
 void findCentroid(struct cluster* cluster);
 
-void free_structs(int NP, int NC, float** points, struct cluster** clusters);
+void free_structs(int N, int K, float** points, struct cluster** clusters);
 
 #endif
