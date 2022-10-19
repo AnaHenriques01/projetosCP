@@ -38,8 +38,6 @@ void init(int N, int K, float** points, struct cluster** clusters) {
         points[p][1] = (float)rand() / RAND_MAX;       // coordinate Y
     }
     for(int i = 0; i < K; i++) {
-        printf("H Point %d: X is %f\n",i,points[i][0]);
-        printf("H Point %d: Y is %f\n\n",i,points[i][1]);
         clusters[i]->centroid[0] = points[i][0];
         clusters[i]->centroid[1] = points[i][1];
         addToPoints(clusters[i], clusters[i]->centroid);
@@ -54,9 +52,11 @@ float euclideanDistance(float x1, float y1, float x2, float y2){
 AQUI, DEPOIS DE FAZER REALLOC, DEVO FAZER MALLOC PARA CADA PONTO?????????????????
 */
 void addToPoints(struct cluster* cluster, float* point) {
-    if(cluster->number_points >= cluster->max_points){
-        cluster->max_points = cluster->number_points++;
+    if(cluster->number_points+1 >= cluster->max_points)
+    {
+        cluster->max_points = cluster->number_points+2;
         cluster->points = realloc(cluster->points, (cluster->max_points)*sizeof(float*));
+        cluster->points[cluster->number_points] = (float*)malloc(2*sizeof(float));
     }
     cluster->points[cluster->number_points][0] = point[0];
     cluster->points[cluster->number_points][1] = point[1];
@@ -64,10 +64,10 @@ void addToPoints(struct cluster* cluster, float* point) {
 }
 
 void addToClosestCluster(float* p, struct cluster** clusters, int K){
-    float minDistance = euclideanDistance(p[0], p[1], clusters[0]->centroid[0], clusters[0]->centroid[1]);
+    float minDistance = euclideanDistance(clusters[0]->centroid[0], clusters[0]->centroid[1], p[0], p[1]);
     int minCluster = 0;
     for(int i = 1; i < K; i++){
-        float newDistance = euclideanDistance(p[0], p[1], clusters[i]->centroid[0], clusters[i]->centroid[1]);
+        float newDistance = euclideanDistance(clusters[i]->centroid[0], clusters[i]->centroid[1], p[0], p[1]);
         if (newDistance < minDistance){
             minDistance = newDistance;
             minCluster = i;
