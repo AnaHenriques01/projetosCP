@@ -15,15 +15,15 @@ int main(){
     int notOver = TRUE;
     int count = 0;
 
-    float* points[2] = initPoints(N);
-    struct cluster** clusters = initClusters(N,K);
-    init(N,K,points,clusters);
-    printf("hiiiiiii");
-
+    float** points = initPoints(5);
+    struct cluster** clusters = initClusters(5,2);
+    init(5,2,points,clusters);
+    printf("hiiiiiii\n");
+/*
     struct cluster* cluster = (struct cluster*)malloc(sizeof(struct cluster));
     cluster->centroid[0] = 1.2;
     cluster->centroid[1] = 2.3;
-    cluster->points[2] = (float*)malloc(5*2*sizeof(float));
+    cluster->points = (float**)malloc(5*sizeof(float*));
     for(int i = 0; i < 4; i++){
         cluster->points[i][0] = (float)((i+1)*2.3);
         cluster->points[i][1] = (float)((i+1)*1.9);
@@ -38,12 +38,9 @@ int main(){
         printf("Point %d: X is %f\n",i,cluster->points[i][0]);
         printf("Point %d: Y is %f\n\n",i,cluster->points[i][1]);
     }
-    for(int i = 0; i < K; i++){
-        free(clusters[i]->points[2]);
-    }
-    free(cluster->points[2]);
+    free(cluster->points);
     free(cluster);
-    /*
+    
     while(notOver){
         if(count == 0){
             // Se for a primeira iteração, não é preciso calcular o centróide.
@@ -82,7 +79,7 @@ int main(){
         printf("Center: (%f, %f) : Size: %d\n",clusters[i]->centroid[0], clusters[i]->centroid[1], clusters[i]->number_points);
     }
     printf("Interations: %d\n",count);
-    */
-    free_structs(K,points,clusters);
+*/
+    free_structs(5, 2,points,clusters);
     return 0;
 }
