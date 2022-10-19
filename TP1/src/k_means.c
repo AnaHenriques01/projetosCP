@@ -15,11 +15,34 @@ int main(){
     int notOver = TRUE;
     int count = 0;
 
-    float** points = initPoints(N);
+    float* points[2] = initPoints(N);
     struct cluster** clusters = initClusters(N,K);
     init(N,K,points,clusters);
     printf("hiiiiiii");
 
+    struct cluster* cluster = (struct cluster*)malloc(sizeof(struct cluster));
+    cluster->centroid[0] = 1.2;
+    cluster->centroid[1] = 2.3;
+    cluster->points[2] = (float*)malloc(5*2*sizeof(float));
+    for(int i = 0; i < 4; i++){
+        cluster->points[i][0] = (float)((i+1)*2.3);
+        cluster->points[i][1] = (float)((i+1)*1.9);
+    }
+    cluster->number_points = 4;
+    cluster->max_points = 6;
+    float p[2];
+    p[0] = 10.8;
+    p[1] = 2.3;
+    //addToPoints(cluster,p);
+    for(int i = 0; i < 4; i++){
+        printf("Point %d: X is %f\n",i,cluster->points[i][0]);
+        printf("Point %d: Y is %f\n\n",i,cluster->points[i][1]);
+    }
+    for(int i = 0; i < K; i++){
+        free(clusters[i]->points[2]);
+    }
+    free(cluster->points[2]);
+    free(cluster);
     /*
     while(notOver){
         if(count == 0){
@@ -60,6 +83,6 @@ int main(){
     }
     printf("Interations: %d\n",count);
     */
-    free_structs(N,K,points,clusters);
+    free_structs(K,points,clusters);
     return 0;
 }
