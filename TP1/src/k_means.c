@@ -66,27 +66,27 @@ int main(){
 
     
     while(notOver){
-        if(count == 0){
-            // Se for a primeira iteração, não é preciso calcular o centróide.
-            for(int p = 0; p < N; p++){
-                addToClosestCluster(points[p],clusters,K);
+        int allEqual = 0;
+        float x_before, y_before;
+        for(int i = 0; i < K; i++){
+            x_before = clusters[i]->centroid[0];
+            y_before = clusters[i]->centroid[1];
+            //printf("[BEFORE] Cluster - Centroid (%f, %f)\n",clusters[i]->centroid[0], clusters[i]->centroid[1]);
+            //printf("[BEFORE] Temp - Centroid (%f, %f)\n\n",x_before, y_before);
+            //printf("num: %d\n",clusters[i]->number_points);
+            //printf("max: %d\n\n",clusters[i]->max_points);
+            findCentroid(clusters[i]);
+            if(x_before == clusters[i]->centroid[0] && y_before == clusters[i]->centroid[1]){
+                allEqual++;
             }
-        } else {
-            int allEqual = 0;
-            for(int i = 0; i < K; i++){
-                struct cluster* temp = clusters[i];
-                findCentroid(clusters[i]);
-                if(temp->centroid[0] == clusters[i]->centroid[0] && temp->centroid[1] == clusters[i]->centroid[1]){
-                    allEqual++;
-                }
-            }
-            if(allEqual == K) notOver = FALSE;
-            else{
-                for(int p = 0; p < N; p++){
-                    addToClosestCluster(points[p],clusters,K);
-                }
-            }
+            //printf("[AFTER] Cluster - Centroid (%f, %f)\n",clusters[i]->centroid[0], clusters[i]->centroid[1]);
+            //printf("[AFTER] Temp - Centroid (%f, %f)\n\n",x_before, y_before);
         }
+        if(allEqual == K) notOver = FALSE;
+        else{
+            addToClosestCluster(K,clusters);
+        }
+        printf("%d\n",count);
         count++;
     }
 

@@ -5,6 +5,7 @@
 
 #include "../include/utils.h"
 
+
 float** initPoints(int N){
     float** points = (float**)malloc(N*sizeof(float*));
     for(int i = 0; i < N; i++){
@@ -14,6 +15,7 @@ float** initPoints(int N){
     }
     return points;
 }
+
 
 struct cluster** initClusters(int N, int K){
     int size = (int)(N/K);
@@ -30,6 +32,7 @@ struct cluster** initClusters(int N, int K){
     return clusters;
 }
 
+
 void init(int N, int K, float** points, struct cluster** clusters) {
 
     srand(10);
@@ -41,16 +44,27 @@ void init(int N, int K, float** points, struct cluster** clusters) {
         clusters[i]->centroid[0] = points[i][0];
         clusters[i]->centroid[1] = points[i][1];
         addToPoints(clusters[i], clusters[i]->centroid);
-    } 
+    }
+    addToClosestClusterInit(K,N,points,clusters);
 }
+
 
 float euclideanDistance(float x1, float y1, float x2, float y2){
     return (float)(sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)));
 }
 
-/*
-AQUI, DEPOIS DE FAZER REALLOC, DEVO FAZER MALLOC PARA CADA PONTO?????????????????
-*/
+
+void findCentroid(struct cluster* cluster){
+    float x_sum = 0.0, y_sum = 0.0;
+    for(int i = 0; i < cluster->number_points; i++){
+        x_sum += cluster->points[i][0];
+        y_sum += cluster->points[i][1];
+    }
+    cluster->centroid[0] = (float)(x_sum/cluster->number_points);
+    cluster->centroid[1] = (float)(y_sum/cluster->number_points);
+}
+
+
 void addToPoints(struct cluster* cluster, float* point) {
     if(cluster->number_points+1 >= cluster->max_points)
     {
@@ -63,7 +77,15 @@ void addToPoints(struct cluster* cluster, float* point) {
     cluster->number_points++;
 }
 
-void addToClosestCluster(float* p, struct cluster** clusters, int K){
+
+void removeOfPoints(int pos, struct cluster* cluster) {
+    for(int i = pos; i < cluster->number_points; i++){
+        cluster->points[i] = cluster->points[i+1];
+    }
+}
+
+
+int closestCluster(float* p, struct cluster** clusters, int K){
     float minDistance = euclideanDistance(clusters[0]->centroid[0], clusters[0]->centroid[1], p[0], p[1]);
     int minCluster = 0;
     for(int i = 1; i < K; i++){
@@ -73,18 +95,31 @@ void addToClosestCluster(float* p, struct cluster** clusters, int K){
             minCluster = i;
         }
     }
-    addToPoints(clusters[minCluster], p);
+    //addToPoints(clusters[minCluster], p);
+    return minCluster;
 }
 
-void findCentroid(struct cluster* cluster){
-    float x_sum = 0.0, y_sum = 0.0;
-    for(int i = 0; i < cluster->number_points; i++){
-        x_sum += cluster->points[i][0];
-        y_sum += cluster->points[i][1];
+
+void addToClosestClusterInit(int K, int N, float** points, struct cluster** clusters){
+    for(int i = K; i < N; i++){
+        int minCluster = closestCluster(points[i],clusters,K);
+        addToPoints(clusters[minCluster],points[i]);
     }
-    cluster->centroid[0] = (float)(x_sum/cluster->number_points);
-    cluster->centroid[1] = (float)(y_sum/cluster->number_points);
 }
+
+void addToClosestCluster(int K, struct cluster** clusters){
+    for(int i = 0; i < K; i++){
+        for(int j = 0; j < clusters[i]->number_points; j++){
+            int minCluster = closestCluster(clusters[i]->points[j],clusters,K);
+            printf("[CLUSTER %d] Point %d -- %d\n",i, j,minCluster);
+            if(minCluster != i){
+                removeOfPoints(j, clusters[i]);
+                addToPoints(clusters[minCluster],clusters[i]->points[j]);
+            }
+        }
+    }
+}
+
 
 void free_points(int N, float** points){
     for(int i = 0; i < N; i++){
@@ -93,6 +128,7 @@ void free_points(int N, float** points){
     free(points);
 }
 
+
 void free_clusters(int K, struct cluster** clusters){
     for(int i = 0; i < K; i++){
         free_points(clusters[i]->max_points,clusters[i]->points);
@@ -100,6 +136,7 @@ void free_clusters(int K, struct cluster** clusters){
     }
     free(clusters);
 }
+
 
 void free_structs(int N, int K, float** points, struct cluster** clusters){
     free_points(N,points);

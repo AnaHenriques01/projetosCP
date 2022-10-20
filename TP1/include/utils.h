@@ -16,7 +16,9 @@ void init(int N, int K, float** points, struct cluster** clusters);
 
 void addToPoints(struct cluster* cluster, float* point);
 
-void addToClosestCluster(float* p, struct cluster** clusters, int K);
+void addToClosestClusterInit(int K, int N, float** points, struct cluster** clusters);
+
+void addToClosestCluster(int K, struct cluster** clusters);
 
 void findCentroid(struct cluster* cluster);
 
