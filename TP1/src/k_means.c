@@ -5,8 +5,8 @@
 
 #include "../include/utils.h"
 
-#define N 30      // number of points   (NP)
-#define K 4             // number of clusters (NC)
+#define N 500      // number of points   (NP)
+#define K 2             // number of clusters (NC)
 #define TRUE 1
 #define FALSE 0
 
@@ -64,7 +64,7 @@ int main(){
     free(cluster);
     */
   
-    while(notOver){
+    do{
         int allEqual = 0;
         float x_before, y_before;
         //printf("[BEFORE] %d\n", count);
@@ -87,7 +87,7 @@ int main(){
         }
         count++;
         //printf("[AFTER] %d\n",count);
-    }
+    } while (notOver);
 
     // ----------------------------------------- OUTPUT DO PROGRAMA:
     printf("N = %d, K = %d\n",N,K);
@@ -96,6 +96,6 @@ int main(){
     }
     printf("Interations: %d\n",count);
     
-    free_structs(N, K, points, clusters);
+    free_structs(K, points, clusters);
     return 0;
 }

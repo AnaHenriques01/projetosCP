@@ -26,6 +26,6 @@ void findCentroid(struct cluster* cluster);
 
 void free_clusters(int K, struct cluster** clusters);
 
-void free_structs(int N, int K, float** points, struct cluster** clusters);
+void free_structs(int K, float** points, struct cluster** clusters);
 
 #endif
