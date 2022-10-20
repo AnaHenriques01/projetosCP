@@ -5,7 +5,7 @@
 
 #include "../include/utils.h"
 
-#define N 10000000      // number of points   (NP)
+#define N 30      // number of points   (NP)
 #define K 4             // number of clusters (NC)
 #define TRUE 1
 #define FALSE 0
@@ -63,31 +63,30 @@ int main(){
     free_points(cluster->max_points,cluster->points);
     free(cluster);
     */
-
-    
+  
     while(notOver){
         int allEqual = 0;
         float x_before, y_before;
+        //printf("[BEFORE] %d\n", count);
         for(int i = 0; i < K; i++){
+
             x_before = clusters[i]->centroid[0];
             y_before = clusters[i]->centroid[1];
-            //printf("[BEFORE] Cluster - Centroid (%f, %f)\n",clusters[i]->centroid[0], clusters[i]->centroid[1]);
-            //printf("[BEFORE] Temp - Centroid (%f, %f)\n\n",x_before, y_before);
-            //printf("num: %d\n",clusters[i]->number_points);
-            //printf("max: %d\n\n",clusters[i]->max_points);
+            //printf("    [BEFORE] Cluster %d -- Centroid (%f, %f)\n",i,x_before, y_before);
             findCentroid(clusters[i]);
+            //printf("    [AFTER] Cluster %d -- Centroid (%f, %f)\n",i,clusters[i]->centroid[0], clusters[i]->centroid[1]);
             if(x_before == clusters[i]->centroid[0] && y_before == clusters[i]->centroid[1]){
                 allEqual++;
             }
-            //printf("[AFTER] Cluster - Centroid (%f, %f)\n",clusters[i]->centroid[0], clusters[i]->centroid[1]);
-            //printf("[AFTER] Temp - Centroid (%f, %f)\n\n",x_before, y_before);
         }
+        //printf("all Equal = %d\n", allEqual);
         if(allEqual == K) notOver = FALSE;
         else{
+            //printf("notOver\n");
             addToClosestCluster(K,clusters);
         }
-        printf("%d\n",count);
         count++;
+        //printf("[AFTER] %d\n",count);
     }
 
     // ----------------------------------------- OUTPUT DO PROGRAMA:

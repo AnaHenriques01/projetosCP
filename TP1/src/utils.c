@@ -82,6 +82,7 @@ void removeOfPoints(int pos, struct cluster* cluster) {
     for(int i = pos; i < cluster->number_points; i++){
         cluster->points[i] = cluster->points[i+1];
     }
+    cluster->number_points = cluster->number_points-1;
 }
 
 
@@ -111,27 +112,28 @@ void addToClosestCluster(int K, struct cluster** clusters){
     for(int i = 0; i < K; i++){
         for(int j = 0; j < clusters[i]->number_points; j++){
             int minCluster = closestCluster(clusters[i]->points[j],clusters,K);
-            printf("[CLUSTER %d] Point %d -- %d\n",i, j,minCluster);
+            //printf("[CLUSTER %d] Point %d -- %d\n",i, j,minCluster);
             if(minCluster != i){
-                removeOfPoints(j, clusters[i]);
                 addToPoints(clusters[minCluster],clusters[i]->points[j]);
+                removeOfPoints(j, clusters[i]);
             }
         }
     }
 }
 
-
+/*
 void free_points(int N, float** points){
+    
     for(int i = 0; i < N; i++){
         free(points[i]);
     }
     free(points);
-}
+}*/
 
 
 void free_clusters(int K, struct cluster** clusters){
     for(int i = 0; i < K; i++){
-        free_points(clusters[i]->max_points,clusters[i]->points);
+        free(clusters[i]->points);
         free(clusters[i]);
     }
     free(clusters);
@@ -139,6 +141,6 @@ void free_clusters(int K, struct cluster** clusters){
 
 
 void free_structs(int N, int K, float** points, struct cluster** clusters){
-    free_points(N,points);
+    free(points);
     free_clusters(K, clusters);
 }
