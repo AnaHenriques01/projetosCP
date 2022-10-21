@@ -1,31 +1,44 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
-struct cluster{
-    float* centroid;    // [1.2, 3.8] = centroid
-    float** points;     // [ [1.2, 3.8], [9.2, 24.1], [3.5, 12.9] ] ---> 3 points
-    int number_points;  // 3
-    int max_points;     // 30
-};
+typedef struct point{
+    float x;
+    float y;
+    int cluster;
+} Point;
 
-float** initPoints(int N);
+typedef struct cluster{
+    Point centroid;   // [x,y]
+    Point* points;    // [[x,y], [x,y], [x,y], ..., ...]
+    int number_points; // 3
+    int max_points;    // 5 -- 2 vazios
+} Cluster;
 
-struct cluster** initClusters(int N, int K);
 
-void init(int N, int K, float** points, struct cluster** clusters);
+Point populatePoint(Point point);
 
-void addToPoints(struct cluster* cluster, float* point);
+//Point* initPoints(int N);
 
-void addToClosestClusterInit(int K, int N, float** points, struct cluster** clusters);
+//Cluster* initClusters(int N, int K);
 
-void addToClosestCluster(int K, struct cluster** clusters);
+Cluster* populateClusters(int K, Cluster* clusters);
 
-void findCentroid(struct cluster* cluster);
+void init(int N, int K, Point* points, Cluster* clusters);
+
+Cluster addToPoints(Cluster cluster, Point point) ;
+
+Cluster* addToClosestClusterInit(int K, int N, Point* points, Cluster* clusters);
+
+int cmpPointsOfClusters(int num_before, int num_after, Point* points_before, Point* points_after);
+
+int addToClosestCluster(int count, int K, int N, Point* points, Cluster* clusters);
+
+Point findCentroid(Cluster cluster);
 
 // void free_points(int N, float** points);
 
-void free_clusters(int K, struct cluster** clusters);
+void free_clusters(int K, Cluster* clusters);
 
-void free_structs(int K, float** points, struct cluster** clusters);
+void free_structs(int K, Point* points, Cluster* clusters);
 
 #endif
