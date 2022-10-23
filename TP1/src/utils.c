@@ -6,19 +6,9 @@
 #include "../include/utils.h"
 
 
-Point populatePoint(Point p){
-    Point point;
-    point.x = p.x;
-    point.y = p.y;
-    return point;
-}
-
-
 Cluster* initClusters(Cluster* clusters, int N, int K){
-    int size = (int)(N/K);
-    Point p = {0.0, 0.0};
-    for(int i = 0; i < K; i++){
-        clusters[i].centroid = populatePoint(p);
+    int size = (int)(N/K), i;
+    for(i = 0; i < K; i++){
         clusters[i].points = (Point*)malloc(size*sizeof(Point));
         clusters[i].number_points = 0;
         clusters[i].max_points = size;
@@ -30,45 +20,31 @@ Cluster* initClusters(Cluster* clusters, int N, int K){
 void init(int N, int K, Point* points, Cluster* clusters) {
 
     clusters = initClusters(clusters,N,K);
-    int stop = 0, num = (int)((N/2)+1);
+    int p, i;
     srand(10);
-    for(int p = 0; p+(num-1) < N; p+=num) {
-        for(int j = 0; j < num; j++){
-            points[p+j].x = (float)rand() / RAND_MAX;
-            points[p+j].y = (float)rand() / RAND_MAX;
-        }
-        stop = p+num;
-    }
-    for(int p = stop; p < N; p++) {
+    for(p = 0; p < N; p++) {
         points[p].x = (float)rand() / RAND_MAX;
         points[p].y = (float)rand() / RAND_MAX;
     }
-    for(int i = 0; i < K; i++) {
+    for(i = 0; i < K; i++) {
         clusters[i].centroid.x = points[i].x;
         clusters[i].centroid.y = points[i].y;
-        clusters[i] = addToPoints(clusters[i], clusters[i].centroid);
+        clusters[i] = addToCluster(clusters[i], clusters[i].centroid);
         points[i].cluster = i;
     }
     addToClosestCluster(0,K,N,points,clusters);
 }
 
 
-float euclideanDistance(float x1, float y1, float x2, float y2){
-    return (float)(sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)));
+float euclideanDistance(Point p1, Point p2){
+    return (float)(sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2)));
 }
 
 
 Point findCentroid(Cluster cluster){
-    int stop = 0, num = (int)((cluster.number_points/2)+1);
+    int i;
     float x_sum = 0.0, y_sum = 0.0;
-    for(int i = 0; i+(num-1) < cluster.number_points; i+=num){
-        for(int j = 0; j < num; j++){
-            x_sum += cluster.points[i+j].x;
-            y_sum += cluster.points[i+j].y;
-        }
-        stop = i+(num-1);
-    }
-    for(int i = stop+1; i < cluster.number_points; i++){
+    for(i = 0; i < cluster.number_points; i++){
         x_sum += cluster.points[i].x;
         y_sum += cluster.points[i].y;
     }
@@ -78,7 +54,7 @@ Point findCentroid(Cluster cluster){
 }
 
 
-Cluster addToPoints(Cluster cluster, Point point){
+Cluster addToCluster(Cluster cluster, Point point){
     if(cluster.number_points+1 > cluster.max_points){
         cluster.max_points = cluster.number_points+2;
         cluster.points = realloc(cluster.points, (cluster.max_points)*sizeof(Point));
@@ -91,10 +67,10 @@ Cluster addToPoints(Cluster cluster, Point point){
 
 
 int closestCluster(Point p, Cluster* clusters, int K){
-    float minDistance = euclideanDistance(p.x, p.y, clusters[0].centroid.x, clusters[0].centroid.y);
-    int minCluster = 0;
-    for(int i = 1; i < K; i++){
-        float newDistance = euclideanDistance(p.x, p.y, clusters[i].centroid.x, clusters[i].centroid.y);
+    float minDistance = euclideanDistance(p, clusters[0].centroid);
+    int minCluster = 0, i;
+    for(i = 1; i < K; i++){
+        float newDistance = euclideanDistance(p, clusters[i].centroid);
         if (newDistance < minDistance){
             minDistance = newDistance;
             minCluster = i;
@@ -106,11 +82,11 @@ int closestCluster(Point p, Cluster* clusters, int K){
 
 int addToClosestCluster(int count, int K, int N, Point* points, Cluster* clusters){
 
-    int value, minCluster, stop = 0, num = (int)((N/2)+1), size = (int)(N/K);
+    int value, minCluster, size = (int)(N/K), i;
     if(count == 0) value = K;
     else{
         value = 0;
-        for(int i = 0; i < K; i++){
+        for(i = 0; i < K; i++){
             clusters[i].centroid = findCentroid(clusters[i]);
             clusters[i].points = realloc(clusters[i].points,size*sizeof(Point));
             clusters[i].number_points = 0;
@@ -118,30 +94,20 @@ int addToClosestCluster(int count, int K, int N, Point* points, Cluster* cluster
         }
     }
     int beforeClu, allEquals = 0;
-    for(int i = value; i+(num-1) < N; i+=num){
-        for(int j = 0; j < num; j++){
-            beforeClu = points[i+j].cluster;
-            minCluster = closestCluster(points[i+j],clusters,K);
-            if(beforeClu == minCluster) allEquals++;
-            points[i+j].cluster = minCluster;
-            clusters[minCluster] = addToPoints(clusters[minCluster],points[i+j]);
-        }
-        stop = i+num;
-    }
-    for(int i = stop; i < N; i++){
+    for(i = value; i < N; i++){
         beforeClu = points[i].cluster;
         minCluster = closestCluster(points[i],clusters,K);
         if(beforeClu == minCluster) allEquals++;
         points[i].cluster = minCluster;
-        clusters[minCluster] = addToPoints(clusters[minCluster],points[i]);
+        clusters[minCluster] = addToCluster(clusters[minCluster],points[i]);
     }
-    printf("allEquals %d\n\n", allEquals);
     return allEquals;
 }
 
 
 void free_clusters(int K, Cluster* clusters){
-    for(int i = 0; i < K; i++){
+    int i;
+    for(i = 0; i < K; i++){
         free(clusters[i].points);
     }
     free(clusters);

@@ -14,7 +14,7 @@ int main(){
 
     printf("N = %d, K = %d\n",N,K);
 
-    clock_t begin = clock();
+    //clock_t begin = clock();
 
     int notOver = TRUE;
     int count = 1, allEqual;
@@ -23,22 +23,22 @@ int main(){
     init(N,K,points,clusters);
     
     do{
-        printf("count %d\n", count);
         allEqual = addToClosestCluster(count, K, N, points, clusters);
         if(allEqual == N) notOver = FALSE;
         else count++;
     } while (notOver);
 
     // ----------------------------------------- OUTPUT DO PROGRAMA:
-    for(int i = 0; i < K; i++){
+    int i;
+    for(i = 0; i < K; i++){
         printf("Center: (%.3f, %.3f) : Size: %d\n",clusters[i].centroid.x, clusters[i].centroid.y, clusters[i].number_points);
     }
     printf("Interations: %d\n",count);
     // ------------------------------------------------------------
 
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    // printf("Elapsed: %.1f seconds\n", time_spent);
+    //clock_t end = clock();
+    //float time_spent = (float)(end - begin) / CLOCKS_PER_SEC;
+    //printf("Elapsed: %.1f seconds\n", time_spent);
 
     free_structs(K, points, clusters);
 
