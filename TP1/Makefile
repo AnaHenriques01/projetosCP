@@ -8,8 +8,8 @@ EXEC = k_means
 CFLAGS = -O3
 #CFLAGS = -funroll-loops -O2
 #CFLAGS = -funroll-loops -O3
-#CFLAGS =  -ftree-vectorize -O2
-#CFLAGS =  -ftree-vectorize -O3
+#CFLAGS =  -ftree-vectorize -msse4 -O2
+#CFLAGS =  -ftree-vectorize -msse4 -O3
 
 .DEFAULT_GOAL = k_means
 
