@@ -22,6 +22,7 @@ int main(){
     Cluster* clusters = (Cluster*)malloc(K*sizeof(Cluster));
     init(N,K,points,clusters);
     
+    if(N <= K) notOver = FALSE;   // BEST CASE
     do{
         allEqual = addToClosestCluster(count, K, N, points, clusters);
         if(allEqual == N) notOver = FALSE;

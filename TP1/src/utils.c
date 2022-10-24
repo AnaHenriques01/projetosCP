@@ -7,11 +7,12 @@
 
 
 Cluster* initClusters(Cluster* clusters, int N, int K){
-    int size = (int)(N/K), i;
+    //int size = (int)(N/K)
+    int i;
     for(i = 0; i < K; i++){
-        clusters[i].points = (Point*)malloc(size*sizeof(Point));
+        clusters[i].points = (Point*)malloc(N*sizeof(Point));
         clusters[i].number_points = 0;
-        clusters[i].max_points = size;
+        clusters[i].max_points = N;
     }
     return clusters;
 }
@@ -55,10 +56,11 @@ Point findCentroid(Cluster cluster){
 
 
 Cluster addToCluster(Cluster cluster, Point point){
+    /*
     if(cluster.number_points+1 > cluster.max_points){
         cluster.max_points = cluster.number_points+2;
         cluster.points = realloc(cluster.points, (cluster.max_points)*sizeof(Point));
-    }
+    }*/
     cluster.points[cluster.number_points].x = point.x;
     cluster.points[cluster.number_points].y = point.y;
     cluster.number_points++;
@@ -82,15 +84,15 @@ int closestCluster(Point p, Cluster* clusters, int K){
 
 int addToClosestCluster(int count, int K, int N, Point* points, Cluster* clusters){
 
-    int value, minCluster, size = (int)(N/K), i;
+    int value, minCluster, i; //size = (int)(N/K), i;
     if(count == 0) value = K;
     else{
         value = 0;
         for(i = 0; i < K; i++){
             clusters[i].centroid = findCentroid(clusters[i]);
-            clusters[i].points = realloc(clusters[i].points,size*sizeof(Point));
+            //clusters[i].points = realloc(clusters[i].points,size*sizeof(Point));
             clusters[i].number_points = 0;
-            clusters[i].max_points = size;
+            //clusters[i].max_points = N;
         }
     }
     int beforeClu, allEquals = 0;
