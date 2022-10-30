@@ -1,91 +1,20 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
-/**
- *  @struct point
- *  @brief It represents a 2D point.
- */
-typedef struct point{
-    float x;              /** Coordinate X */
-    float y;              /** Coordinate Y */
-    int cluster;          /** Point's Cluster */
-} Point;
-
-
-/**
- *  @struct cluster
- *  @brief It represents a cluster.
- */
-typedef struct cluster{
-    Point centroid;       /** Cluster's Centroid */
-    Point* points;        /** Cluster's Points */
-    int number_points;    /** Number of Points */
-    int max_points;       /** Maximum of Points */
-} Cluster;
-
-
-/**
- * @brief It populates a point's coordinates X and Y.
- * @param point The point whose coordinates will be used to populate another.
- * @return A new populated point.
- */
-Point populatePoint(Point point);
-
-
-/**
- * @brief It inits the K clusters.
- * @param clusters The K clusters.
- * @param N Number of points in the program.
- * @param K Number of clusters in the program.
- * @return The K clusters initialized.
- */
-Cluster* initClusters(Cluster* clusters, int N, int K);
-
+#define K 4
+#define N 10000000
+float points[N*3];
 
 /**
  * @brief It inits the N points and K clusters.
  * @param N Number of points in the program.
- * @param K Number of clusters in the program.
- * @param clusters The N points.
- * @param clusters The K clusters.
+ * @param K array of size N×F containing input feature vectors
+ * @param points The N points with three features (x, y, cluster it belongs to).
+ * @param num_elems Number of points of each cluster.
+ * @param centroids Array of size K*2 containing the cluster centroids.
+ * @param sum Array of size K*2 containing the sum of points of each cluster.
  */
-void init(int N, int K, Point* points, Cluster* clusters);
-
-
-/**
- * @brief It calculates the euclidean distance between two points.
- * @param p1 A point.
- * @param p2 A point.
- * @return Euclidean Distance between two points.
- */
-float euclideanDistance(Point p1, Point p2);
-
-
-/**
- * @brief It calculates the centroid of a given cluster.
- * @param cluster The cluster whose centroid is to be calculated.
- * @return The centroid.
- */
-Point findCentroid(Cluster cluster);
-
-
-/**
- * @brief It adds a point to a cluster.
- * @param cluster The cluster to where the point will be added.
- * @param point The point to be added.
- * @return The cluster with the new point.
- */
-Cluster addToCluster(Cluster cluster, Point point);
-
-
-/**
- * @brief It finds the closest cluster to a given point.
- * @param point A point.
- * @param clusters The K clusters.
- * @param K Number of clusters in the program.
- * @return The index of the closest cluster to a given point.
- */
-int closestCluster(Point p, Cluster* clusters, int K);
+void init(float sum[K*2], int num_elems[K], float centroids[K*2]);
 
 
 /**
@@ -95,25 +24,9 @@ int closestCluster(Point p, Cluster* clusters, int K);
  * @param N Number of points in the program.
  * @param points The N points.
  * @param clusters The K clusters.
+ * @param sum Array of size K*2 containing the sum of points of each cluster.
  * @return The number of points that didn't change of cluster.
  */
-int addToClosestCluster(int count, int K, int N, Point* points, Cluster* clusters);
-
-
-/**
- * @brief It deallocates the memory previously allocated for the K clusters.
- * @param K Number of clusters in the program.
- * @param clusters The K clusters.
- */
-void free_clusters(int K, Cluster* clusters);
-
-
-/**
- * @brief It deallocates the memory previously allocated for the N points and the K clusters.
- * @param K Number of clusters in the program.
- * @param points The N points.
- * @param clusters The K clusters.
- */
-void free_structs(int K, Point* points, Cluster* clusters);
+int addToClosestCluster(int count, int num_elems[K], float centroids[K*2], float sum[K*2]);
 
 #endif

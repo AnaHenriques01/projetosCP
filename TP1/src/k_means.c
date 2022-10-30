@@ -5,43 +5,34 @@
 
 #include "../include/utils.h"
 
-#define N 10000000
-#define K 4
-#define TRUE 1
-#define FALSE 0
 
 int main(){
 
     printf("N = %d, K = %d\n",N,K);
 
-    //clock_t begin = clock();
+    int notOver = 1;
+    int count = 1, allEquals;
+    float sum[K*2];
+    int num_elems[K];
+    float centroids[K*2];
+    init(sum,num_elems,centroids);
+    addToClosestCluster(0,num_elems,centroids,sum);
 
-    int notOver = TRUE;
-    int count = 1, allEqual;
-    Point* points = (Point*)malloc(N*sizeof(Point));
-    Cluster* clusters = (Cluster*)malloc(K*sizeof(Cluster));
-    init(N,K,points,clusters);
-    
-    if(N <= K) notOver = FALSE;   // BEST CASE
+    if(N <= K) notOver = 0;   // BEST CASE
     do{
-        allEqual = addToClosestCluster(count, K, N, points, clusters);
-        if(allEqual == N) notOver = FALSE;
+        allEquals = addToClosestCluster(count, num_elems, centroids, sum);
+        if(allEquals == N) notOver = 0;
         else count++;
     } while (notOver);
 
     // ----------------------------------------- OUTPUT DO PROGRAMA:
-    int i;
-    for(i = 0; i < K; i++){
-        printf("Center: (%.3f, %.3f) : Size: %d\n",clusters[i].centroid.x, clusters[i].centroid.y, clusters[i].number_points);
+    int i, i2 = 0;
+    for(i = 0; i+1 < K*2; i+=2){
+        printf("Center: (%.3f, %.3f) : Size: %d\n",centroids[i], centroids[i+1], num_elems[i2], sum);
+        i2++;
     }
     printf("Interations: %d\n",count);
     // ------------------------------------------------------------
-
-    //clock_t end = clock();
-    //float time_spent = (float)(end - begin) / CLOCKS_PER_SEC;
-    //printf("Elapsed: %.1f seconds\n", time_spent);
-
-    free_structs(K, points, clusters);
 
     return 0;
 }
