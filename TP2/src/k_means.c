@@ -6,21 +6,23 @@
 #include "../include/utils.h"
 
 
-int main(){
+int main(int argc, char *argv[]){
 
     printf("N = %d, K = %d\n",N,K);
 
     int notOver = 1;
     int count = 1, allEquals;
+    int K = atoi(argv[2]), threads = atoi(argv[3]);
     float sum[K*2];
     int num_elems[K];
     float centroids[K*2];
-    init(sum,num_elems,centroids);
-    addToClosestCluster(0,num_elems,centroids,sum);
+
+    init(K, threads, sum, num_elems, centroids);
+    addToClosestCluster(0, K, threads, num_elems, centroids, sum);
 
     if(N <= K) notOver = 0;   // BEST CASE
     do{
-        allEquals = addToClosestCluster(count, num_elems, centroids, sum);
+        allEquals = addToClosestCluster(count, K, num_elems, centroids, sum);
         if(allEquals == N) notOver = 0;
         else count++;
     } while (notOver);

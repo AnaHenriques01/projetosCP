@@ -8,21 +8,27 @@
 
 void init(float sum[K*2], int num_elems[K], float centroids[K*2]) {
 
-    int p, i, i2 = 0;
-    srand(10);
-    for(p = 0; p+2 < N*3; p+=3) {
-        points[p] = (float)rand() / RAND_MAX;
-        points[p+1] = (float)rand() / RAND_MAX;
-        points[p+2] = -1.0;
-    }
-    for(i = 0; i+1 < K*2; i+=2) {
-        centroids[i] = points[i2];
-        centroids[i+1] = points[i2+1];
-        num_elems[i/2] = 1;
-        points[i2+2] = (float)i/2;
-        sum[i] = points[i2];
-        sum[i+1] = points[i2+1];
-        i2+=3; 
+    #pragma omp parallel num_threads(num_threads){
+
+        int p, i, i2 = 0;
+        srand(10);
+
+        #pragma omp for schedule(dynamic)
+        for(p = 0; p+2 < N*3; p+=3) {
+            points[p] = (float)rand() / RAND_MAX;
+            points[p+1] = (float)rand() / RAND_MAX;
+            points[p+2] = -1.0;
+        }
+        #pragma omp barrier
+        for(i = 0; i+1 < K*2; i+=2) {
+            centroids[i] = points[i2];
+            centroids[i+1] = points[i2+1];
+            num_elems[i/2] = 1;
+            points[i2+2] = (float)i/2;
+            sum[i] = points[i2];
+            sum[i+1] = points[i2+1];
+            i2+=3; 
+        }
     }
 }
 
