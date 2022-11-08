@@ -8,7 +8,8 @@
 
 void init(int K, int threads, float sum[K*2], int num_elems[K], float centroids[K*2]) {
 
-    #pragma omp parallel num_threads(threads){
+    #pragma omp parallel num_threads(threads)
+    {
 
         int p, i, i2 = 0;
         srand(10);
@@ -49,7 +50,8 @@ int addToClosestCluster(int count, int K, int threads, int num_elems[K], float c
         }
     }
 
-    #pragma omp parallel num_threads(threads){
+    #pragma omp parallel num_threads(threads)
+    {
 
         #pragma omp for schedule(dynamic)
         for(i = value*3; i+2 < N*3; i+=3){
