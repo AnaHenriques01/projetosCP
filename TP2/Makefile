@@ -5,12 +5,12 @@ INCLUDES = include/
 EXEC = k_means
 THREADS = 2
 
-#CFLAGS = -O2
-CFLAGS = -O3
-#CFLAGS = -funroll-loops -O2
-#CFLAGS = -funroll-loops -O3
-#CFLAGS = -ftree-vectorize -msse4 -O2
-#CFLAGS = -ftree-vectorize -msse4 -O3
+#CFLAGS = -O2 -fopenmp
+CFLAGS = -O3 -fopenmp
+#CFLAGS = -funroll-loops -O2 -fopenmp
+#CFLAGS = -funroll-loops -O3 -fopenmp
+#CFLAGS = -ftree-vectorize -msse4 -O2 -fopenmp
+#CFLAGS = -ftree-vectorize -msse4 -O3 -fopenmp
 
 .DEFAULT_GOAL = k_means
 

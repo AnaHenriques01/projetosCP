@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
 
     int notOver = 1;
     int count = 1, allEquals;
-    int K = atoi(argv[2]), threads = atoi(argv[3]);
+    int K = 4/*atoi(argv[2])*/, threads = 2/*atoi(argv[3])*/;
     float sum[K*2];
     int num_elems[K];
     float centroids[K*2];

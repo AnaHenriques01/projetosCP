@@ -6,14 +6,14 @@
 #include "../include/utils.h"
 
 
-void init(float sum[K*2], int num_elems[K], float centroids[K*2]) {
+void init(int K, int threads, float sum[K*2], int num_elems[K], float centroids[K*2]) {
 
-    #pragma omp parallel num_threads(num_threads){
+    #pragma omp parallel num_threads(threads){
 
         int p, i, i2 = 0;
         srand(10);
 
-        #pragma omp for schedule(dynamic)
+        #pragma omp for
         for(p = 0; p+2 < N*3; p+=3) {
             points[p] = (float)rand() / RAND_MAX;
             points[p+1] = (float)rand() / RAND_MAX;
@@ -33,7 +33,7 @@ void init(float sum[K*2], int num_elems[K], float centroids[K*2]) {
 }
 
 
-int addToClosestCluster(int count, int num_elems[K], float centroids[K*2], float sum[K*2]){
+int addToClosestCluster(int count, int K, int threads, int num_elems[K], float centroids[K*2], float sum[K*2]){
     int value, minCluster, i, j, beforeClu, numElems, allEquals = 0;
     float minDistance, newDistance, x_sum, y_sum;
     if(count == 0) value = K;
@@ -48,23 +48,28 @@ int addToClosestCluster(int count, int num_elems[K], float centroids[K*2], float
             sum[j+1]=0.0;
         }
     }
-    for(i = value*3; i+2 < N*3; i+=3){
-        beforeClu = points[i+2];
-        minDistance = (centroids[0] - points[i])*(centroids[0] - points[i]) + (centroids[1] - points[i+1])*(centroids[1] - points[i+1]);
-        minCluster = 0;
-        for(j = 2; j+1 < K*2; j+=2){
-            newDistance = (centroids[j] - points[i])*(centroids[j] - points[i]) + (centroids[j+1] - points[i+1])*(centroids[j+1] - points[i+1]);
-            if (newDistance < minDistance){
-                minDistance = newDistance;
-                minCluster = j/2;
-            }
-        }
-        sum[2*minCluster] += points[i];
-        sum[(2*minCluster)+1] += points[i+1];
 
-        if(beforeClu == minCluster) allEquals++;
-        points[i+2] = minCluster;
-        num_elems[minCluster]++;
+    #pragma omp parallel num_threads(threads){
+
+        #pragma omp for schedule(dynamic)
+        for(i = value*3; i+2 < N*3; i+=3){
+            beforeClu = points[i+2];
+            minDistance = (centroids[0] - points[i])*(centroids[0] - points[i]) + (centroids[1] - points[i+1])*(centroids[1] - points[i+1]);
+            minCluster = 0;
+            for(j = 2; j+1 < K*2; j+=2){
+                newDistance = (centroids[j] - points[i])*(centroids[j] - points[i]) + (centroids[j+1] - points[i+1])*(centroids[j+1] - points[i+1]);
+                if (newDistance < minDistance){
+                    minDistance = newDistance;
+                    minCluster = j/2;
+                }
+            }
+            sum[2*minCluster] += points[i];
+            sum[(2*minCluster)+1] += points[i+1];
+
+            if(beforeClu == minCluster) allEquals++;
+            points[i+2] = minCluster;
+            num_elems[minCluster]++;
+        }
     }
     return allEquals;
 }
