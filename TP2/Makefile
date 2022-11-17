@@ -23,8 +23,8 @@ $(BIN)utils.o: $(SRC)utils.c $(INCLUDES)utils.h
 clean:
 	rm -r bin/*
 
-runseq:
+runseq: k_means
 	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS)
 
-runpar:
-	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $THREADS
+runpar: k_means
+	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)

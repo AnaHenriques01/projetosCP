@@ -2,7 +2,7 @@
 #define __UTILS_H
 
 #define N 10000000
-float points[N * 3];
+float points[N*3];
 
 /**
  * @brief It inits the N points and K clusters.
@@ -12,17 +12,8 @@ float points[N * 3];
  * @param num_elems Number of points of each cluster.
  * @param centroids Array of size K*2 containing the cluster centroids.
  */
-void init(int K, float sum[K * 2], int num_elems[K], float centroids[K * 2]);
+void init(int K, int threads, float sum[K*2], int num_elems[K], float centroids[K*2]);
 
-/**
- * @brief It calculates the Euclidean distance between the point and the centroid 
- * @param centroidX Centroid x coordinate
- * @param centroidY Centroid y coordinate
- * @param pointX Point x coordinate
- * @param pointY Point y coordinate
- * @return The euclidean distance between the point and the centroid 
- */
-static inline float calculateDistance(float centroidX, float centroidY, float pointX, float pointY);
 
 /**
  * @brief It adds the N points to their closest cluster.
@@ -34,6 +25,6 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
  * @param sum Array of size K*2 containing the sum of points of each cluster.
  * @return The number of points that didn't change of cluster.
  */
-int addToClosestCluster(int count, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2]);
+int addToClosestCluster(int count, int K, int threads, int num_elems[K], float centroids[K*2], float sum[K*2]);
 
 #endif
