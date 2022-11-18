@@ -31,25 +31,21 @@ void init(int K, float sum[K * 2], int num_elems[K], float centroids[K * 2])
     }
 }
 
-// acrescentar o inline faz com que apenas seja aplicada a função e não que chame a função
-// do que me lembro isto não mexe praticamente com o tempo
-// foi mais para a legibilidade do código
 static inline float calculateDistance(float centroidX, float centroidY, float pointX, float pointY)
 {
     return (centroidX - pointX) * (centroidX - pointX) + (centroidY - pointY) * (centroidY - pointY);
 }
 
-int addToClosestCluster(int count, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
+void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
-    int allEquals = 0;
-    int value, minCluster, beforeCluster, numElems;
+    int startIndex, minCluster, numElems;
     float minDistance, newDistance;
 
-    if (count == 0)
-        value = K;
+    if (iteration == 0)
+        startIndex = K;
     else
     {
-        value = 0;
+        startIndex = 0;
         for (int j = 0; j + 1 < K * 2; j += 2)
         {
             numElems = num_elems[j / 2];
@@ -64,9 +60,8 @@ int addToClosestCluster(int count, int K, int num_elems[K], float centroids[K * 
     int size_sum = K * 2;
     int size_num_elems = K;
 #pragma omp parallel for reduction(+ : sum[:size_sum]) reduction(+  : num_elems[:size_num_elems])
-    for (int i = value * 3; i + 2 < N * 3; i += 3)
+    for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
-        beforeCluster = points[i + 2];
         minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
         minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
@@ -81,10 +76,7 @@ int addToClosestCluster(int count, int K, int num_elems[K], float centroids[K * 
         sum[2 * minCluster] += points[i];
         sum[(2 * minCluster) + 1] += points[i + 1];
 
-        if (beforeCluster == minCluster)
-            allEquals++;
         points[i + 2] = minCluster;
         num_elems[minCluster]++;
     }
-    return allEquals;
 }

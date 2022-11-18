@@ -26,7 +26,7 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
 
 /**
  * @brief It adds the N points to their closest cluster.
- * @param count The loop iteration's index.
+ * @param iteration The loop iteration's index.
  * @param K Number of clusters in the program.
  * @param threads number of threads used.
  * @param num_elems Number of points of each cluster.
@@ -34,6 +34,6 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
  * @param sum Array of size K*2 containing the sum of points of each cluster.
  * @return The number of points that didn't change of cluster.
  */
-int addToClosestCluster(int count, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2]);
+void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2]);
 
 #endif

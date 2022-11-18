@@ -11,8 +11,7 @@
 int main(int argc, char *argv[])
 {
 
-    // int notOver = 1;
-    int allEquals = 0, count = 1;
+    int iteration = 1;
     int K = atoi(argv[2]), num_threads = atoi(argv[3]);
     float sum[K * 2];
     int num_elems[K];
@@ -25,18 +24,10 @@ int main(int argc, char *argv[])
     init(K, sum, num_elems, centroids);
     addToClosestCluster(0, K, num_elems, centroids, sum);
 
-    // if(N <= K) notOver = 0;   // BEST CASE
-    /* do{
-         allEquals = addToClosestCluster(count, K, threads, num_elems, centroids, sum);
-         //if(allEquals == N) notOver = 0;
-         //else count++;
-         count++;
-     } while (count < 20);*/
-
-    while (count <= MAX_ITERATIONS)
+    while (iteration <= MAX_ITERATIONS)
     {
-        allEquals = addToClosestCluster(count, K, num_elems, centroids, sum);
-        count++;
+        addToClosestCluster(iteration, K, num_elems, centroids, sum);
+        iteration++;
     }
 
     // ----------------------------------------- OUTPUT DO PROGRAMA:
@@ -46,7 +37,7 @@ int main(int argc, char *argv[])
         printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[i], centroids[i + 1], num_elems[i2]);
         i2++;
     }
-    printf("Interations: %d\n", count - 1);
+    printf("Interations: %d\n", iteration - 1);
     // ------------------------------------------------------------
 
     return 0;
