@@ -24,7 +24,7 @@ clean:
 	rm -r bin/*
 
 runseq: k_means
-	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS)
+	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) 1
 
 runpar: k_means
 	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)

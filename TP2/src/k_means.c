@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 {
 
     int iteration = 1;
+    printf("%s\n",argv[0]);
     int K = atoi(argv[2]), num_threads = atoi(argv[3]);
     float sum[K * 2];
     int num_elems[K];
