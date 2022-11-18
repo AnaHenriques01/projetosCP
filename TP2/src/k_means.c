@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
         printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[i], centroids[i + 1], num_elems[i2]);
         i2++;
     }
-    printf("Interations: %d\n", iteration - 1);
+    printf("Iterations: %d\n", iteration - 1);
     // ------------------------------------------------------------
 
     return 0;
