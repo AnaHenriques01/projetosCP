@@ -2,8 +2,8 @@
 
 Projetos de Computação Paralela 22/23
 
-- Classificação TP1: 1.8/3
-- Classificação TP2: .../3
+- Classificação TP1: 1.80/3
+- Classificação TP2: 1.85/3
 - Classificação TP3: .../8
 
 # Autores
