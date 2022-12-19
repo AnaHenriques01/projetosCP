@@ -59,7 +59,10 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
 
     int size_sum = K * 2;
     int size_num_elems = K;
-#pragma omp parallel for reduction(+ : sum[:size_sum]) reduction(+  : num_elems[:size_num_elems])
+
+#pragma omp parallel for firstprivate(startIndex) private(minDistance, minCluster, newDistance) reduction(+                             \
+                                                                                                          : sum[:size_sum]) reduction(+ \
+                                                                                                                                      : num_elems[:size_num_elems])
     for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
         minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
