@@ -41,11 +41,9 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     int startIndex, minCluster, numElems;
     float minDistance, newDistance;
 
-    if (iteration == 0)
-        startIndex = K;
-    else
+    // Cálculo dos novos centróides e restauração do valor sum e do número de elementos de cada cluster
+    if (iteration > 0)
     {
-        startIndex = 0;
         for (int j = 0; j + 1 < K * 2; j += 2)
         {
             numElems = num_elems[j / 2];
@@ -57,14 +55,19 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         }
     }
 
-    int size_sum = K * 2;
-    int size_num_elems = K;
+    // Atribuir um valor para o índice de partida consoante a iteração atual
+    if (iteration == 0)
+        startIndex = K;
+    else
+        startIndex = 0;
 
+// Paralelização do ciclio usando diretivas OpenMP
 #pragma omp parallel for firstprivate(startIndex) private(minDistance, minCluster, newDistance) reduction(+                             \
-                                                                                                          : sum[:size_sum]) reduction(+ \
-                                                                                                                                      : num_elems[:size_num_elems])
+                                                                                                      : sum[:K * 2]) reduction(+ \
+                                                                                                                                  : num_elems[:K])
     for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
+        // Encontrar o cluster mais perto consoante o seu centróide
         minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
         minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
@@ -76,10 +79,11 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
                 minCluster = j / 2;
             }
         }
-        sum[2 * minCluster] += points[i];
-        sum[(2 * minCluster) + 1] += points[i + 1];
 
+        // Adicionar o ponto do cluster mais próximo e atualizar o valor de sum e o número de elementos de cada cluster
         points[i + 2] = minCluster;
+        sum[minCluster * 2] += points[i];
+        sum[minCluster * 2 + 1] += points[i + 1];
         num_elems[minCluster]++;
     }
 }
