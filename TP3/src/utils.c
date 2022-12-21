@@ -6,9 +6,10 @@
 
 #include "../include/utils.h"
 
+#include <mpi.h>
+
 void init(int K, float sum[K * 2], int num_elems[K], float centroids[K * 2])
 {
-
     int index = 0;
     srand(10);
 
@@ -61,13 +62,24 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     else
         startIndex = 0;
 
-// Paralelização do ciclio usando diretivas OpenMP
-#pragma omp parallel for firstprivate(startIndex) private(minDistance, minCluster, newDistance) reduction(+                             \
-                                                                                                      : sum[:K * 2]) reduction(+ \
-                                                                                                                                  : num_elems[:K])
-    for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
+    // Initialize MPI variables
+    int num_procs, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // Calculate the portion of the loop each process should handle
+    int portion = (N * 3 - startIndex * 3) / num_procs;
+    int start = startIndex * 3 + portion * rank;
+    int end = start + portion;
+
+    if (rank == num_procs - 1)
     {
-        // Encontrar o cluster mais perto consoante o seu centróide
+        end = N * 3;
+    }
+    // Iterate over the portion of the loop assigned to this process
+    for (int i = start; i < end; i += 3)
+    {
+        // Find the closest cluster based on its centroid
         minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
         minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
@@ -80,10 +92,27 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
             }
         }
 
-        // Adicionar o ponto do cluster mais próximo e atualizar o valor de sum e o número de elementos de cada cluster
+        // Assign the point to the closest cluster and update the sum and number of elements for each cluster
         points[i + 2] = minCluster;
         sum[minCluster * 2] += points[i];
         sum[minCluster * 2 + 1] += points[i + 1];
         num_elems[minCluster]++;
+    }
+
+    // Gather the sum and num_elems arrays from all processes into a single array on the root process
+    float global_sum[K * 2];
+    int global_num_elems[K];
+    MPI_Reduce(sum, global_sum, K * 2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(num_elems, global_num_elems, K, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    // If this is the root process, update the centroids based on the global sum and num_elems arrays
+    if (rank == 0)
+    {
+        for (int j = 0; j + 1 < K * 2; j += 2)
+        {
+            numElems = global_num_elems[j / 2];
+            centroids[j] = global_sum[j] / numElems;
+            centroids[j + 1] = global_sum[j + 1] / numElems;
+        }
     }
 }

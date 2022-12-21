@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
+#include <mpi.h>
 
 #include "../include/utils.h"
 
@@ -10,9 +11,11 @@
 
 int main(int argc, char *argv[])
 {
+    // Initialize MPI
+    MPI_Init(&argc, &argv);
 
     int iteration = 1;
-    printf("%s\n",argv[0]);
+    printf("%s\n", argv[0]);
     int K = atoi(argv[2]), num_threads = atoi(argv[3]);
     float sum[K * 2];
     int num_elems[K];
@@ -40,6 +43,9 @@ int main(int argc, char *argv[])
     }
     printf("Iterations: %d\n", iteration - 1);
     // ------------------------------------------------------------
+
+    // Finalize MPI
+    MPI_Finalize();
 
     return 0;
 }

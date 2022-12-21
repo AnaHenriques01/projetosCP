@@ -1,4 +1,4 @@
-CC = gcc
+CC = mpicc
 BIN = bin/
 SRC = src/
 INCLUDES = include/
@@ -27,4 +27,4 @@ runseq: k_means
 	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) 1
 
 runpar: k_means
-	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
+	mpirun -np 1 ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
