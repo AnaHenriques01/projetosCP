@@ -39,7 +39,7 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
 
 void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
-    int startIndex, numElems;
+    int startIndex, numElems, mpi_error;
     // float minDistance, newDistance;
 
     // Cálculo dos novos centróides e restauração do valor sum e do número de elementos de cada cluster
@@ -62,25 +62,16 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     else
         startIndex = 0;
 
-    // Initialize MPI variables
-    int num_procs, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // Broadcast the centroids from the root process to all other processes
+    mpi_error = MPI_Bcast(centroids, K * 2, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    if (mpi_error != MPI_SUCCESS)
+        printf("[ERROR] Problems broadcasting the centroids from the root process to all other processes!");
 
-    // Calculate the portion of the loop each process should handle
-    int portion = (N * 3 - startIndex * 3) / num_procs;
-    int start = startIndex * 3 + portion * rank;
-    int end = start + portion;
-
-    if (rank == num_procs - 1)
-    {
-        end = N * 3;
-    }
-    // Iterate over the portion of the loop assigned to this process
-#pragma omp parallel for reduction(+                          \
-                                   : sum[:K * 2]) reduction(+ \
-                                                            : num_elems[:K])
-    for (int i = start; i < end; i += 3)
+        // Iterate over the portion of the loop assigned to this process
+#pragma omp parallel for schedule(static) reduction(+                          \
+                                                    : sum[:K * 2]) reduction(+ \
+                                                                             : num_elems[:K])
+    for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
         // Find the closest cluster based on its centroid
         float minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
@@ -105,17 +96,18 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     // Gather the sum and num_elems arrays from all processes into a single array on the root process
     float global_sum[K * 2];
     int global_num_elems[K];
-    MPI_Reduce(sum, global_sum, K * 2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-    MPI_Reduce(num_elems, global_num_elems, K, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    mpi_error = MPI_Reduce(sum, global_sum, K * 2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (mpi_error != MPI_SUCCESS)
+        printf("[ERROR] Problems gathering the sum array from all processes into a single array on the root process!");
 
-    // If this is the root process, update the centroids based on the global sum and num_elems arrays
-    if (rank == 0)
+    mpi_error = MPI_Reduce(num_elems, global_num_elems, K, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (mpi_error != MPI_SUCCESS)
+        printf("[ERROR] Problems gathering the num_elems array from all processes into a single array on the root process!");
+
+    for (int j = 0; j + 1 < K * 2; j += 2)
     {
-        for (int j = 0; j + 1 < K * 2; j += 2)
-        {
-            numElems = global_num_elems[j / 2];
-            centroids[j] = global_sum[j] / numElems;
-            centroids[j + 1] = global_sum[j + 1] / numElems;
-        }
+        numElems = global_num_elems[j / 2];
+        centroids[j] = global_sum[j] / numElems;
+        centroids[j + 1] = global_sum[j + 1] / numElems;
     }
 }
