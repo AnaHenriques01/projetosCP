@@ -39,8 +39,8 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
 
 void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
-    int startIndex, minCluster, numElems;
-    float minDistance, newDistance;
+    int startIndex, numElems;
+    // float minDistance, newDistance;
 
     // Cálculo dos novos centróides e restauração do valor sum e do número de elementos de cada cluster
     if (iteration > 0)
@@ -77,14 +77,17 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         end = N * 3;
     }
     // Iterate over the portion of the loop assigned to this process
+#pragma omp parallel for reduction(+                          \
+                                   : sum[:K * 2]) reduction(+ \
+                                                            : num_elems[:K])
     for (int i = start; i < end; i += 3)
     {
         // Find the closest cluster based on its centroid
-        minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
-        minCluster = 0;
+        float minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
+        int minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
         {
-            newDistance = calculateDistance(centroids[j], centroids[j + 1], points[i], points[i + 1]);
+            float newDistance = calculateDistance(centroids[j], centroids[j + 1], points[i], points[i + 1]);
             if (newDistance < minDistance)
             {
                 minDistance = newDistance;
