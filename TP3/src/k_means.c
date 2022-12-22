@@ -14,14 +14,14 @@ int main(int argc, char *argv[])
     // Initialize MPI
     MPI_Init(&argc, &argv);
 
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
     int iteration = 1;
-    printf("%s\n", argv[0]);
     int K = atoi(argv[2]), num_threads = atoi(argv[3]);
     float sum[K * 2];
     int num_elems[K];
     float centroids[K * 2];
-
-    printf("N = %d, K = %d\n", N, K);
 
     omp_set_num_threads(num_threads);
 
@@ -34,15 +34,16 @@ int main(int argc, char *argv[])
         iteration++;
     }
 
-    // ----------------------------------------- OUTPUT DO PROGRAMA:
-    int i, i2 = 0;
-    for (i = 0; i + 1 < K * 2; i += 2)
+    // Only process with rank 0 will print the output
+    if (rank == 0)
     {
-        printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[i], centroids[i + 1], num_elems[i2]);
-        i2++;
+        printf("N = %d, K = %d\n", N, K);
+        printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[0], centroids[1], num_elems[0]);
+        printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[2], centroids[3], num_elems[1]);
+        printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[4], centroids[5], num_elems[2]);
+        printf("Center: (%.3f, %.3f) : Size: %d\n", centroids[6], centroids[7], num_elems[3]);
+        printf("Iterations: %d\n", iteration - 1);
     }
-    printf("Iterations: %d\n", iteration - 1);
-    // ------------------------------------------------------------
 
     // Finalize MPI
     MPI_Finalize();

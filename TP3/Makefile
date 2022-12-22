@@ -3,7 +3,6 @@ BIN = bin/
 SRC = src/
 INCLUDES = include/
 EXEC = k_means
-THREADS = 2
 
 #CFLAGS = -O2 -fopenmp
 CFLAGS = -O3 -fopenmp
@@ -23,8 +22,8 @@ $(BIN)utils.o: $(SRC)utils.c $(INCLUDES)utils.h
 clean:
 	rm -r bin/*
 
-runseq: k_means
+runseq:
 	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) 1
 
-runpar: k_means
-	mpirun -np 1 ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
+runpar:
+	mpirun -np 2 ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)

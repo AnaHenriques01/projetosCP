@@ -40,12 +40,12 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
 void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
     int startIndex, numElems, mpi_error;
-    // float minDistance, newDistance;
 
     // Cálculo dos novos centróides e restauração do valor sum e do número de elementos de cada cluster
     if (iteration > 0)
     {
-        for (int j = 0; j + 1 < K * 2; j += 2)
+#pragma omp parallel for schedule(static) private(numElems)
+        for (int j = 0; j < K * 2; j += 2)
         {
             numElems = num_elems[j / 2];
             centroids[j] = sum[j] / numElems;
