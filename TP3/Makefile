@@ -27,3 +27,14 @@ runseq:
 
 runpar:
 	mpirun -np 2 ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
+
+# cat run.sh:
+# #!/bin/sh
+# #SBATCH --partition=cpar
+# #SBATCH --ntasks 2
+# #SBATCH -c 2
+# perf stat make runpar CP_CLUSTERS=4 THREADS=2
+sbatch:
+	sbatch --output=bin/output.txt run.sh
+	sleep 5
+	cat bin/output.txt
