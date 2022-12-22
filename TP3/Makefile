@@ -21,20 +21,20 @@ $(BIN)utils.o: $(SRC)utils.c $(INCLUDES)utils.h
 
 clean:
 	rm -r bin/*
+	rm -r out.txt
 
 runseq:
 	./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) 1
 
 runpar:
-	mpirun -np 2 ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
+	mpirun -np ${NTASKS} ./$(BIN)$(EXEC) 10000000 $(CP_CLUSTERS) $(THREADS)
 
-# cat run.sh:
-# #!/bin/sh
-# #SBATCH --partition=cpar
-# #SBATCH --ntasks 2
-# #SBATCH -c 2
-# perf stat make runpar CP_CLUSTERS=4 THREADS=2
 sbatch:
-	sbatch --output=bin/output.txt run.sh
-	sleep 5
-	cat bin/output.txt
+	@echo "#!/bin/sh" > run.sh
+	@echo "#SBATCH --partition=cpar" >> run.sh
+	@echo "#SBATCH --ntasks 2" >> run.sh
+	@echo "#SBATCH -c 2" >> run.sh
+	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}" >> run.sh
+	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}"
+	sbatch --output=out.txt run.sh
+	@echo "Keep trying to open the file out.txt until the output is printed"
