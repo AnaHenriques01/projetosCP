@@ -6,9 +6,10 @@
 
 #include "../include/utils.h"
 
+#include <mpi.h>
+
 void init(int K, float sum[K * 2], int num_elems[K], float centroids[K * 2])
 {
-
     int index = 0;
     srand(10);
 
@@ -38,15 +39,12 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
 
 void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
-    int startIndex, minCluster, numElems;
-    float minDistance, newDistance;
+    int startIndex, numElems, mpi_error;
 
-    if (iteration == 0)
-        startIndex = K;
-    else
+    if (iteration > 0)
     {
-        startIndex = 0;
-        for (int j = 0; j + 1 < K * 2; j += 2)
+#pragma omp parallel for schedule(static) private(numElems)
+        for (int j = 0; j < K * 2; j += 2)
         {
             numElems = num_elems[j / 2];
             centroids[j] = sum[j] / numElems;
@@ -57,29 +55,31 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         }
     }
 
-    int size_sum = K * 2;
-    int size_num_elems = K;
+    if (iteration == 0)
+        startIndex = K;
+    else
+        startIndex = 0;
 
-#pragma omp parallel for firstprivate(startIndex) private(minDistance, minCluster, newDistance) reduction(+                             \
-                                                                                                          : sum[:size_sum]) reduction(+ \
-                                                                                                                                      : num_elems[:size_num_elems])
+#pragma omp parallel for schedule(static) reduction(+                          \
+                                                    : sum[:K * 2]) reduction(+ \
+                                                                             : num_elems[:K])
     for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
-        minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
-        minCluster = 0;
+        float minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
+        int minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
         {
-            newDistance = calculateDistance(centroids[j], centroids[j + 1], points[i], points[i + 1]);
+            float newDistance = calculateDistance(centroids[j], centroids[j + 1], points[i], points[i + 1]);
             if (newDistance < minDistance)
             {
                 minDistance = newDistance;
                 minCluster = j / 2;
             }
         }
-        sum[2 * minCluster] += points[i];
-        sum[(2 * minCluster) + 1] += points[i + 1];
 
         points[i + 2] = minCluster;
+        sum[minCluster * 2] += points[i];
+        sum[minCluster * 2 + 1] += points[i + 1];
         num_elems[minCluster]++;
     }
 }
