@@ -41,7 +41,6 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
 {
     int startIndex, numElems, mpi_error;
 
-    // Cálculo dos novos centróides e restauração do valor sum e do número de elementos de cada cluster
     if (iteration > 0)
     {
 #pragma omp parallel for schedule(static) private(numElems)
@@ -56,7 +55,6 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         }
     }
 
-    // Atribuir um valor para o índice de partida consoante a iteração atual
     if (iteration == 0)
         startIndex = K;
     else
@@ -67,13 +65,11 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     if (mpi_error != MPI_SUCCESS)
         printf("[ERROR] Problems broadcasting the centroids from the root process to all other processes!");
 
-        // Iterate over the portion of the loop assigned to this process
 #pragma omp parallel for schedule(static) reduction(+                          \
                                                     : sum[:K * 2]) reduction(+ \
                                                                              : num_elems[:K])
     for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
-        // Find the closest cluster based on its centroid
         float minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
         int minCluster = 0;
         for (int j = 2; j + 1 < K * 2; j += 2)
@@ -86,7 +82,6 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
             }
         }
 
-        // Assign the point to the closest cluster and update the sum and number of elements for each cluster
         points[i + 2] = minCluster;
         sum[minCluster * 2] += points[i];
         sum[minCluster * 2 + 1] += points[i + 1];

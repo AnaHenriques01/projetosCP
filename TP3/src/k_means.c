@@ -11,9 +11,10 @@
 
 int main(int argc, char *argv[])
 {
-    // Initialize MPI
+    // Init MPI
     MPI_Init(&argc, &argv);
 
+    // Get the rank of the current process
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
         iteration++;
     }
 
-    // Only process with rank 0 will print the output
+    // Only process with rank 0 can print the output
     if (rank == 0)
     {
         printf("N = %d, K = %d\n", N, K);
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
         printf("Iterations: %d\n", iteration - 1);
     }
 
-    // Finalize MPI
+    // Finzalize MPI
     MPI_Finalize();
 
     return 0;
