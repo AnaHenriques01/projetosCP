@@ -37,9 +37,9 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
     return (centroidX - pointX) * (centroidX - pointX) + (centroidY - pointY) * (centroidY - pointY);
 }
 
-void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
+int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2])
 {
-    int startIndex, numElems, mpi_error;
+    int startIndex, numElems, mpi_error, allEquals = 0;
 
     if (iteration > 0)
     {
@@ -47,8 +47,11 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         for (int j = 0; j < K * 2; j += 2)
         {
             numElems = num_elems[j / 2];
-            centroids[j] = sum[j] / numElems;
-            centroids[j + 1] = sum[j + 1] / numElems;
+#pragma omp critical
+            {
+                centroids[j] = sum[j] / numElems;
+                centroids[j + 1] = sum[j + 1] / numElems;
+            }
             num_elems[j / 2] = 0;
             sum[j] = 0.0;
             sum[j + 1] = 0.0;
@@ -60,21 +63,24 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
     else
         startIndex = 0;
 
-    // Broadcast the centroids from the root process to all other processes
+    // Broadcast the centroids from the root process to every other process
     mpi_error = MPI_Bcast(centroids, K * 2, MPI_FLOAT, 0, MPI_COMM_WORLD);
     if (mpi_error != MPI_SUCCESS)
         printf("[ERROR] Problems broadcasting the centroids from the root process to all other processes!");
 
-#pragma omp parallel for schedule(static) reduction(+                          \
-                                                    : sum[:K * 2]) reduction(+ \
-                                                                             : num_elems[:K])
+#pragma omp parallel for schedule(static) reduction(+                                                     \
+                                                    : sum[:K * 2]) reduction(+                            \
+                                                                             : num_elems[:K]) reduction(+ \
+                                                                                                        : allEquals)
     for (int i = startIndex * 3; i + 2 < N * 3; i += 3)
     {
-        float minDistance = calculateDistance(centroids[0], centroids[1], points[i], points[i + 1]);
+        float previousCluster = points[i + 2];
+        float minDistance = (centroids[0] - points[i]) * (centroids[0] - points[i]) + (centroids[1] - points[i + 1]) * (centroids[1] - points[i + 1]);
         int minCluster = 0;
+
         for (int j = 2; j + 1 < K * 2; j += 2)
         {
-            float newDistance = calculateDistance(centroids[j], centroids[j + 1], points[i], points[i + 1]);
+            float newDistance = (centroids[j] - points[i]) * (centroids[j] - points[i]) + (centroids[j + 1] - points[i + 1]) * (centroids[j + 1] - points[i + 1]);
             if (newDistance < minDistance)
             {
                 minDistance = newDistance;
@@ -83,12 +89,14 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         }
 
         points[i + 2] = minCluster;
+        if (previousCluster == minCluster)
+            allEquals++;
         sum[minCluster * 2] += points[i];
         sum[minCluster * 2 + 1] += points[i + 1];
         num_elems[minCluster]++;
     }
 
-    // Gather the sum and num_elems arrays from all processes into a single array on the root process
+    // Gather the sum and num_elems arrays from every process into a single array on the root process
     float global_sum[K * 2];
     int global_num_elems[K];
     mpi_error = MPI_Reduce(sum, global_sum, K * 2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
@@ -105,4 +113,5 @@ void addToClosestCluster(int iteration, int K, int num_elems[K], float centroids
         centroids[j] = global_sum[j] / numElems;
         centroids[j + 1] = global_sum[j + 1] / numElems;
     }
+    return allEquals;
 }

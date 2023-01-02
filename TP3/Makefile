@@ -37,4 +37,5 @@ sbatch:
 	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}" >> run.sh
 	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}"
 	sbatch --output=out.txt run.sh
+	@echo "Check if the file out.txt does already exist"
 	@echo "Keep trying to open the file out.txt until the output is printed"
