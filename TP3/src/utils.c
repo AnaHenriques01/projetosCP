@@ -37,12 +37,9 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
     return (centroidX - pointX) * (centroidX - pointX) + (centroidY - pointY) * (centroidY - pointY);
 }
 
-int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2], int rank, int num_processes)
+int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2], float *scattered_points, int rank, int points_chunks)
 {
     int allEquals = 0;
-
-    int points_chunks = N / num_processes;
-    float *scattered_points = (float *)malloc(points_chunks * 3 * sizeof(float));
 
     if (iteration > 0)
     {
@@ -57,8 +54,6 @@ int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[
 
     // Broadcast the centroids from the root process to every other process
     MPI_Bcast(centroids, K * 2, MPI_FLOAT, 0, MPI_COMM_WORLD);
-
-    MPI_Scatter(points, points_chunks * 3, MPI_FLOAT, scattered_points, points_chunks * 3, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
 #pragma omp parallel for schedule(static) reduction(+                                                       \
                                                     : sum[:(K * 2)]) reduction(+                            \
@@ -91,8 +86,10 @@ int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[
     float global_sum[K * 2];
     int global_num_elems[K];
 
+    // Takes the points modified from every process and gathers them to the root process
     MPI_Gather(scattered_points, points_chunks * 3, MPI_FLOAT, points, points_chunks * 3, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
+    // Takes the sum and num_elems arrays from each process and returns an array of output elements to the root process
     MPI_Reduce(sum, global_sum, K * 2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
     MPI_Reduce(num_elems, global_num_elems, K, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
@@ -106,6 +103,5 @@ int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[
             centroids[j + 1] = global_sum[j + 1] / numElems;
         }
     }
-    free(scattered_points);
     return allEquals;
 }

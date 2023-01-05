@@ -31,9 +31,9 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
  * @param centroids Array of size K*2 containing the cluster centroids.
  * @param sum Array of size K*2 containing the sum of points of each cluster.
  * @param rank The rank of the current process executing.
- * @param num_processes The number of the total processes executing.
+ * @param points_chunks The number of points that each chunk atributed to each process has.
  * @return The number of points that didn't change of cluster.
  */
-int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2], int rank, int num_processes);
+int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2], float *scattered_points, int rank, int points_chunks);
 
 #endif

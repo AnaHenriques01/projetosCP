@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    // Get the total number of processes running
     int num_processes;
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 
@@ -26,22 +27,28 @@ int main(int argc, char *argv[])
     float sum[K * 2];
     int num_elems[K];
     float centroids[K * 2];
-    // float points[N * 3];
     int converged = 0;
+
+    int points_chunks = N / num_processes;
+    float *scattered_points = (float *)malloc(points_chunks * 3 * sizeof(float));
 
     omp_set_num_threads(num_threads);
 
     init(K, sum, num_elems, centroids);
-    addToClosestCluster(0, K, num_elems, centroids, sum, rank, num_processes);
 
+    // The root process sends chunks of the array points to different processes
+    MPI_Scatter(points, points_chunks * 3, MPI_FLOAT, scattered_points, points_chunks * 3, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+    addToClosestCluster(0, K, num_elems, centroids, sum, scattered_points, rank, points_chunks);
     while (!converged && iteration <= MAX_ITERATIONS)
     {
-        int allEquals = addToClosestCluster(iteration, K, num_elems, centroids, sum, rank, num_processes);
+        int allEquals = addToClosestCluster(iteration, K, num_elems, centroids, sum, scattered_points, rank, points_chunks);
         if (allEquals == N)
             converged = 1;
         else
             iteration++;
     }
+    free(scattered_points);
 
     // Only process with rank 0 can print the output
     if (rank == 0)
