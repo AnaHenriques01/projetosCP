@@ -1,9 +1,7 @@
 #ifndef __UTILS_H
 #define __UTILS_H
-
 #define N 10000000
 float points[N * 3];
-
 /**
  * @brief It inits the N points and K clusters.
  * @param K array of size N×F containing input feature vectors.
@@ -32,8 +30,10 @@ static inline float calculateDistance(float centroidX, float centroidY, float po
  * @param num_elems Number of points of each cluster.
  * @param centroids Array of size K*2 containing the cluster centroids.
  * @param sum Array of size K*2 containing the sum of points of each cluster.
+ * @param rank The rank of the current process executing.
+ * @param num_processes The number of the total processes executing.
  * @return The number of points that didn't change of cluster.
  */
-int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2]);
+int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[K * 2], float sum[K * 2], int rank, int num_processes);
 
 #endif

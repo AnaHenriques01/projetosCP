@@ -32,7 +32,7 @@ runpar:
 sbatch:
 	@echo "#!/bin/sh" > run.sh
 	@echo "#SBATCH --partition=cpar" >> run.sh
-	@echo "#SBATCH --ntasks 2" >> run.sh
+	@echo "#SBATCH --ntasks 4" >> run.sh
 	@echo "#SBATCH -c 2" >> run.sh
 	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}" >> run.sh
 	@echo "perf stat make runpar NTASKS=${NTASKS} CP_CLUSTERS=${CP_CLUSTERS} THREADS=${THREADS}"

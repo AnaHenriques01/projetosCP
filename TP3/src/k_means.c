@@ -18,21 +18,25 @@ int main(int argc, char *argv[])
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    int num_processes;
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+
     int iteration = 1;
     int K = atoi(argv[2]), num_threads = atoi(argv[3]);
     float sum[K * 2];
     int num_elems[K];
     float centroids[K * 2];
+    // float points[N * 3];
     int converged = 0;
 
     omp_set_num_threads(num_threads);
 
     init(K, sum, num_elems, centroids);
-    addToClosestCluster(0, K, num_elems, centroids, sum);
+    addToClosestCluster(0, K, num_elems, centroids, sum, rank, num_processes);
 
     while (!converged && iteration <= MAX_ITERATIONS)
     {
-        int allEquals = addToClosestCluster(iteration, K, num_elems, centroids, sum);
+        int allEquals = addToClosestCluster(iteration, K, num_elems, centroids, sum, rank, num_processes);
         if (allEquals == N)
             converged = 1;
         else
@@ -49,7 +53,6 @@ int main(int argc, char *argv[])
         }
         printf("Iterations: %d\n", iteration - 1);
     }
-
     // Finzalize MPI
     MPI_Finalize();
 
