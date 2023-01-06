@@ -95,7 +95,7 @@ int addToClosestCluster(int iteration, int K, int num_elems[K], float centroids[
 
     if (rank == 0)
     {
-        for (int j = 0; j + 1 < K * 2; j += 2)
+        for (int j = 0; j < K * 2; j += 2)
         {
             int numElems = global_num_elems[j / 2];
             num_elems[j / 2] = global_num_elems[j / 2];
